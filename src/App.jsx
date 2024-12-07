@@ -15,6 +15,7 @@ function App() {
     style={{ background: "transparent" }}>
       <Experience/>
       <OrbitControls />
+      <axesHelper args={[5]} />
     </Canvas>
   )
 }

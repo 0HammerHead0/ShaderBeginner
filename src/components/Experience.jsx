@@ -18,9 +18,15 @@ function Experience() {
       vertexShader: `
         uniform float u_time;
 
+        varying float vHeight;
         void main() {
           vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-          modelPosition.z += sin(modelPosition.y + 4.0 * u_time * 1.0) * 0.2;
+          vHeight = modelPosition.y;
+          float t = clamp(vHeight, -0.5, 0.5); // Assuming the geometry's Y-bounds are -0.5 to 0.5
+          t = (t + 0.5); // Normalize to 0.0 to 1.0 range
+
+          modelPosition.z += sin(modelPosition.y * 2.0 + 4.0 * u_time * 1.0) * 0.2 * (1.0-t);
+              modelPosition.z += cos(modelPosition.x * 5.0 + 4.0 * u_time * 1.0) * (1.0-t) * 0.1;
           vec4 viewPosition = viewMatrix * modelPosition;
           vec4 projectedPosition = projectionMatrix * viewPosition;
           gl_Position = projectedPosition;
@@ -65,18 +71,32 @@ function Experience() {
             uniform float u_time;
 
             varying vec2 vUv;
-
+            varying float vHeight;
             void main() {
               vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-              modelPosition.z += sin(modelPosition.y + 4.0 * u_time * 1.0) * 0.2;
+              vHeight = modelPosition.y;
+              float t = clamp(vHeight, -0.5, 0.5); // Assuming the geometry's Y-bounds are -0.5 to 0.5
+              t = (t + 0.5); // Normalize to 0.0 to 1.0 range
+
+              modelPosition.z += sin(modelPosition.y * 2.0 + 4.0 * u_time * 1.0) * 0.2 * (1.0-t);
+              modelPosition.z += cos(modelPosition.x * 5.0 + 4.0 * u_time * 1.0) * (1.0-t) * 0.1;
               vec4 viewPosition = viewMatrix * modelPosition;
               vec4 projectedPosition = projectionMatrix * viewPosition;
               gl_Position = projectedPosition;
             }
           `}
           fragmentShader={`
+            varying float vHeight;
+
             void main() {
-              gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+              // Map height to a range between 0.0 and 1.0
+              float t = clamp(vHeight, -0.5, 0.5); // Assuming the geometry's Y-bounds are -0.5 to 0.5
+              t = (t + 0.5); // Normalize to 0.0 to 1.0 range
+
+              // Interpolate between red and blue
+              vec3 color = mix(vec3(1.0, 0.0, 0.0), vec3(0.0, 0.0, 1.0), t);
+
+              gl_FragColor = vec4(color, 1.0);
             }
           `}
           uniforms={uniforms}
